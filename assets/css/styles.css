@@ -53,6 +53,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 /* =================================================================
    SCROLL CONTAINER / SLIDES
    ================================================================= */
+/* Proximity is the safe default: on narrow screens the case studies
+   stack and run taller than the viewport, and mandatory snapping there
+   can strand content between snap points. The desktop media query
+   upgrades this to mandatory, where every slide fits one screen. */
 #scroller {
   height: 100vh;
   height: 100svh;
@@ -271,7 +275,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   border-radius: 22px;
   overflow: hidden;
   aspect-ratio: 3 / 4;
-  max-width: 30rem;
+  max-width: 22rem;
   box-shadow: 0 30px 70px -25px rgba(32, 30, 28, 0.28);
   background: var(--paper-2);
 }
@@ -320,33 +324,46 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 /* =================================================================
    2. ABOUT / INTRO
    ================================================================= */
+/* Sized to sit at the same visual weight as a case study, so the
+   intro reads as part of the same set rather than a blown-up outlier */
+.slide--about .slide__inner { max-width: 74rem; }
+
 .about-grid {
   display: grid;
-  grid-template-columns: 0.85fr 1.15fr;
-  gap: clamp(2rem, 6vw, 5rem);
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: clamp(2rem, 4.5vw, 3.5rem);
   align-items: center;
+}
+.slide--about .statement {
+  font-size: clamp(1.5rem, 2.6vw, 2.2rem);
+  line-height: 1.2;
+}
+.slide--about .body-text {
+  font-size: clamp(0.9rem, 1vw, 1rem);
+  line-height: 1.65;
+  margin-top: 0.85rem;
 }
 
 .intro-columns {
-  margin-top: 2.25rem;
+  margin-top: 1.75rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem 2.5rem;
+  gap: 1.25rem 2.5rem;
 }
 .intro-column__label {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-faint);
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.7rem;
 }
 .intro-column ul li {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   letter-spacing: 0.01em;
   padding-left: 1.1rem;
   position: relative;
-  margin-bottom: 0.55rem;
+  margin-bottom: 0.45rem;
   color: var(--ink);
 }
 .intro-column ul li::before {
@@ -366,7 +383,17 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
    stranded source link a stacked layout produced.
    ================================================================= */
 .slide--case { padding-top: 4rem; padding-bottom: 3rem; }
-.slide--case .slide__inner { max-width: 84rem; }
+
+/* A case study's height is driven by its width: the 16:9 video and the
+   justified photo row both scale with the showcase column. So cap the
+   layout width against the viewport HEIGHT as well, otherwise a short
+   wide window (a laptop at 100% zoom) pushes the photo row off-screen.
+   The 84rem ceiling still applies on tall displays. */
+.slide--case .slide__inner {
+  max-width: 84rem;
+  max-width: min(84rem, calc(1.45 * (100vh - 14.5rem) + 12rem));
+  max-width: min(84rem, calc(1.45 * (100svh - 14.5rem) + 12rem));
+}
 
 .case-layout {
   display: grid;
@@ -491,7 +518,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
    all without cropping. Mixed portrait/landscape sets stay tidy. */
 .case-gallery {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.85rem;
   margin-top: 0.9rem;
 }
@@ -509,7 +536,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   display: block;
 }
 /* a lone still would otherwise stretch the full column width */
-.case-gallery--single { max-width: 34rem; }
+.case-gallery--single {
+  max-width: 34rem;
+  max-width: min(34rem, calc((100vh - 14.5rem) * 0.5));
+  max-width: min(34rem, calc((100svh - 14.5rem) * 0.5));
+}
 
 /* instagram embed — the reel is portrait and much taller than a
    16:9 video, so on DOOM the showcase splits side by side: embed
@@ -520,11 +551,22 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   margin: 0 !important;
 }
 
-/* Instagram's embed script enforces a 326px minimum iframe width, so
-   this column must stay wider than that or the embed fails to render */
+/* The reel and the stills sit side by side rather than stacked, so this
+   slide is far shorter than the others and can afford a wider layout —
+   which is what lets the stills grow enough to match the reel's height. */
+.slide--split .slide__inner {
+  max-width: 84rem;
+  max-width: min(84rem, calc(1.95 * (100vh - 14.5rem) + 12rem));
+  max-width: min(84rem, calc(1.95 * (100svh - 14.5rem) + 12rem));
+}
+
+/* Instagram's embed script enforces a 326px minimum iframe width, so the
+   reel column sits just above that floor (20.5rem = 328px) — as narrow as
+   it can go. The stills cap at 22rem, the width at which their stacked
+   height lands level with the reel. */
 .case-showcase--split {
   display: grid;
-  grid-template-columns: 22rem minmax(0, 1fr);
+  grid-template-columns: 20.5rem minmax(0, 22rem);
   gap: 1.25rem;
   align-items: start;
 }
@@ -668,6 +710,30 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 /* =================================================================
    RESPONSIVE
    ================================================================= */
+
+/* Desktop: every slide fits one screen, so snapping can be mandatory —
+   scrolling always settles on a slide rather than halfway between two.
+   The min-height guard matters: on a window too short to fit a slide,
+   mandatory snapping would strand the clipped content out of reach, so
+   those fall back to proximity where it stays scrollable. */
+@media (min-width: 901px) and (min-height: 640px) {
+  #scroller { scroll-snap-type: y mandatory; }
+}
+
+/* Short desktop windows: trim the written column, which is what runs
+   long once the layout narrows (a narrower column wraps to more lines) */
+@media (min-width: 901px) and (max-height: 800px) {
+  .slide--case { padding-top: 3.25rem; padding-bottom: 2rem; }
+  .project-title { font-size: clamp(1.5rem, 2.4vw, 2rem); }
+  .project-sub { font-size: 0.9rem; }
+  .case-copy .body-text { font-size: 0.88rem; margin-top: 0.4rem; }
+  .case-stats { gap: 0.7rem 1.25rem; margin: 0.9rem 0; padding: 0.9rem 0; }
+  .case-stat__num { font-size: clamp(1.2rem, 1.8vw, 1.5rem); }
+  .case-stat__label { font-size: 0.62rem; }
+  .source-note { font-size: 0.68rem; }
+  .clip-switcher__item { width: 5.25rem; }
+}
+
 @media (max-width: 900px) {
   .slide { padding-top: 4rem; }
   .about-grid { grid-template-columns: 1fr; gap: 2rem; }
@@ -681,7 +747,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
      instead of squeezing two columns onto a narrow screen */
   .case-layout { grid-template-columns: 1fr; gap: 2rem; }
   .case-showcase--split { grid-template-columns: 1fr; }
-  .case-showcase--split .case-gallery { columns: 2 8rem; margin-top: 0.85rem; }
+  .case-gallery { flex-wrap: wrap; }
+  .case-showcase--split .case-gallery { flex-direction: row; margin-top: 0.85rem; }
   .instagram-frame { justify-content: center; }
 }
 
@@ -689,5 +756,4 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .slide__inner { padding-top: 1rem; padding-bottom: 1rem; }
   .case-stats { grid-template-columns: repeat(2, 1fr); }
   .clip-switcher__item { width: 5rem; }
-  .case-gallery { columns: 2 7rem; }
 }
