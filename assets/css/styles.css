@@ -1,0 +1,693 @@
+/* =================================================================
+   TOKENS
+   ================================================================= */
+:root {
+  --paper: #faf7f1;
+  --paper-2: #f2ece0;
+  --cream: #fffdfa;
+  --ink: #201e1c;
+  --ink-2: #1c1c1c;
+  --ink-soft: rgba(32, 30, 28, 0.62);
+  --ink-faint: rgba(32, 30, 28, 0.42);
+  --red: #c8102e;
+  --red-2: #a10d26;
+  --gold: #c9a24b;
+
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 0.4s;
+  --dur-med: 0.8s;
+  --dur-slow: 1.4s;
+
+  --edge: clamp(1.5rem, 5vw, 4.5rem);
+
+  --chrome-bg: var(--paper);
+  --chrome-fg: var(--ink);
+  --chrome-muted: rgba(32, 30, 28, 0.35);
+  --chrome-accent: var(--red);
+}
+
+/* =================================================================
+   RESET / BASE
+   ================================================================= */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+h1, h2, h3, blockquote, p, ul, ol, figure { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+a { color: inherit; text-decoration: none; }
+img, video { max-width: 100%; display: block; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+::selection { background: var(--red); color: var(--cream); }
+
+/* =================================================================
+   SCROLL CONTAINER / SLIDES
+   ================================================================= */
+#scroller {
+  height: 100vh;
+  height: 100svh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-snap-type: y proximity;
+  scroll-behavior: smooth;
+}
+
+.slide {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  width: 100%;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  padding-top: 4.5rem;
+  padding-bottom: 3rem;
+  background: var(--paper);
+  color: var(--ink);
+}
+.slide--tint { background: var(--paper-2); }
+
+.slide__inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 90rem;
+  margin: 0 auto;
+  padding: clamp(1.25rem, 3.5vh, 2rem) var(--edge);
+}
+
+
+/* =================================================================
+   TYPE
+   ================================================================= */
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--red-2);
+  margin-bottom: 1.1rem;
+}
+
+.statement {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.85rem, 3.8vw, 3.1rem);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+
+.body-text {
+  font-size: clamp(1rem, 1.15vw, 1.15rem);
+  line-height: 1.7;
+  color: var(--ink-soft);
+  max-width: 36rem;
+}
+.body-text + .body-text { margin-top: 1.1rem; }
+
+
+/* =================================================================
+   FIXED CHROME
+   ================================================================= */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.025;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 180px 180px;
+}
+
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  z-index: 50;
+  background: transparent;
+}
+.progress-bar__fill {
+  height: 100%;
+  width: 0%;
+  background: var(--chrome-accent);
+}
+
+.brand-mark {
+  position: fixed;
+  left: clamp(1.25rem, 3vw, 2.5rem);
+  top: clamp(1.1rem, 2.5vh, 1.75rem);
+  z-index: 45;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+  color: var(--chrome-fg);
+  opacity: 0.85;
+}
+
+.dot-nav {
+  position: fixed;
+  right: clamp(1.25rem, 3vw, 2.5rem);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  gap: 0.78rem;
+}
+.dot-nav__item {
+  position: relative;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--chrome-muted);
+  transition: background-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.dot-nav__item:hover { transform: scale(1.3); }
+.dot-nav__item.is-active {
+  background: var(--chrome-accent);
+  transform: scale(1.35);
+}
+.dot-nav__label {
+  position: absolute;
+  right: 150%;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--chrome-fg);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease);
+  pointer-events: none;
+}
+.dot-nav__item:hover .dot-nav__label,
+.dot-nav__item:focus-visible .dot-nav__label { opacity: 0.8; }
+
+.slide-counter {
+  position: fixed;
+  left: clamp(1.25rem, 3vw, 2.5rem);
+  bottom: clamp(1.25rem, 3vh, 2rem);
+  z-index: 45;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--chrome-fg);
+  opacity: 0.55;
+  display: flex;
+  gap: 0.35em;
+}
+
+/* =================================================================
+   REVEAL ANIMATION
+   ================================================================= */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease);
+  transition-delay: calc(var(--stagger, 0) * 90ms);
+}
+.slide.is-active [data-reveal] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { transition-duration: 0.01ms; transform: none; }
+  #scroller { scroll-behavior: auto; }
+}
+
+/* =================================================================
+   1. COVER
+   ================================================================= */
+.slide--cover { justify-content: center; text-align: center; }
+.slide--cover .slide__inner { display: flex; flex-direction: column; align-items: center; }
+
+.cover__blush {
+  position: absolute;
+  z-index: 0;
+  width: 50vw; height: 50vw;
+  top: -18%; right: -14%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200, 16, 46, 0.09) 0%, transparent 70%);
+  will-change: transform;
+}
+
+.cover__name {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(3rem, 9vw, 6.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  margin: 0.35rem 0 1.5rem;
+}
+.cover__meta {
+  font-size: 0.9rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-faint);
+  max-width: 30rem;
+  line-height: 1.6;
+}
+
+.intro-photo-frame {
+  position: relative;
+  z-index: 1;
+  border-radius: 22px;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  max-width: 30rem;
+  box-shadow: 0 30px 70px -25px rgba(32, 30, 28, 0.28);
+  background: var(--paper-2);
+}
+.intro-photo-frame img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center 18%;
+}
+
+.scroll-cue {
+  position: absolute;
+  bottom: clamp(1.5rem, 4vh, 2.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.scroll-cue__line {
+  width: 1px;
+  height: 34px;
+  background: linear-gradient(to bottom, currentColor, transparent);
+  animation: cueMove 2.2s var(--ease) infinite;
+}
+@keyframes cueMove {
+  0% { transform: scaleY(0.4); transform-origin: top; opacity: 0.3; }
+  50% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+  100% { transform: scaleY(0.4); transform-origin: bottom; opacity: 0.3; }
+}
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(3%, -4%) scale(1.06); }
+}
+.cover__blush { animation: drift 20s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .cover__blush { animation: none !important; }
+  .scroll-cue__line { animation: none; }
+}
+
+/* =================================================================
+   2. ABOUT / INTRO
+   ================================================================= */
+.about-grid {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: clamp(2rem, 6vw, 5rem);
+  align-items: center;
+}
+
+.intro-columns {
+  margin-top: 2.25rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem 2.5rem;
+}
+.intro-column__label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 0.85rem;
+}
+.intro-column ul li {
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
+  padding-left: 1.1rem;
+  position: relative;
+  margin-bottom: 0.55rem;
+  color: var(--ink);
+}
+.intro-column ul li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0.5em;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+}
+
+/* =================================================================
+   CASE STUDY SECTIONS — two columns, echoing the About slide: the
+   written case (title, stats, sources) on the left, the media
+   showcase (video + uncropped photo collage) on the right. Keeping
+   both columns full-height avoids the dead top-right gutter and the
+   stranded source link a stacked layout produced.
+   ================================================================= */
+.slide--case { padding-top: 4rem; padding-bottom: 3rem; }
+.slide--case .slide__inner { max-width: 84rem; }
+
+.case-layout {
+  display: grid;
+  grid-template-columns: 0.72fr 1.28fr;
+  gap: clamp(1.75rem, 3.5vw, 3.25rem);
+  align-items: center;
+}
+.case-copy { min-width: 0; }
+.case-showcase { min-width: 0; }
+
+.project-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.75rem, 2.9vw, 2.5rem);
+  line-height: 1.06;
+  margin-bottom: 0.45rem;
+}
+.project-sub {
+  font-size: clamp(0.95rem, 1.15vw, 1.05rem);
+  color: var(--ink-soft);
+}
+.case-copy .body-text { margin-top: 0.5rem; font-size: 0.95rem; }
+
+/* stat grid — sits in the left column, wrapping to as many rows as
+   the campaign needs */
+.case-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+  gap: 1.1rem 1.5rem;
+  margin: 1.4rem 0;
+  padding: 1.4rem 0;
+  border-top: 1px solid rgba(32, 30, 28, 0.14);
+  border-bottom: 1px solid rgba(32, 30, 28, 0.14);
+}
+
+.case-stat__num {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+  font-weight: 500;
+  color: var(--red);
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+.case-stat__label {
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.35;
+  color: var(--ink-faint);
+}
+
+/* source links */
+.source-links { display: flex; flex-wrap: wrap; gap: 1.5rem; }
+.source-link {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--red);
+  border-bottom: 1px solid rgba(200, 16, 46, 0.35);
+  padding-bottom: 2px;
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.source-link:hover { color: var(--gold); border-color: var(--gold); }
+
+/* media frame shared by video + instagram case studies — keeps its
+   native aspect ratio, so nothing gets stretched or cropped to fit */
+.case-media {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--ink-2);
+  box-shadow: 0 24px 60px -30px rgba(32, 30, 28, 0.35);
+}
+.case-media--video { aspect-ratio: 16 / 9; }
+.case-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sound-toggle {
+  position: absolute;
+  right: 0.9rem;
+  bottom: 0.9rem;
+  z-index: 3;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 19, 18, 0.55);
+  backdrop-filter: blur(6px);
+  color: var(--cream);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: background-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.sound-toggle:hover { background: var(--red); transform: scale(1.06); }
+.sound-toggle svg { width: 1.1rem; height: 1.1rem; }
+
+.now-playing {
+  position: absolute;
+  left: 0.9rem;
+  top: 0.9rem;
+  z-index: 3;
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(251, 248, 242, 0.85);
+  background: rgba(20, 19, 18, 0.55);
+  backdrop-filter: blur(6px);
+  padding: 0.4em 0.75em;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* photo collage — sits under the video in the showcase column.
+   Justified rows: each photo carries its own aspect ratio as --ar,
+   and both flex-basis and flex-grow scale with it, so photos in a
+   row land on a shared height and the row fills the full width —
+   all without cropping. Mixed portrait/landscape sets stay tidy. */
+.case-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 0.9rem;
+}
+.case-gallery__item {
+  flex: var(--ar, 1) 1 calc(var(--ar, 1) * 9rem);
+  min-width: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--paper-2);
+  border: 1px solid rgba(32, 30, 28, 0.1);
+}
+.case-gallery__item img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+/* a lone still would otherwise stretch the full column width */
+.case-gallery--single { max-width: 34rem; }
+
+/* instagram embed — the reel is portrait and much taller than a
+   16:9 video, so on DOOM the showcase splits side by side: embed
+   left, stills stacked beside it, keeping the section one screen. */
+.instagram-frame { display: flex; justify-content: flex-start; }
+.instagram-frame iframe {
+  border-radius: 14px !important;
+  margin: 0 !important;
+}
+
+/* Instagram's embed script enforces a 326px minimum iframe width, so
+   this column must stay wider than that or the embed fails to render */
+.case-showcase--split {
+  display: grid;
+  grid-template-columns: 22rem minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+.case-showcase--split .case-gallery {
+  flex-direction: column;
+  margin-top: 0;
+}
+.case-showcase--split .case-gallery__item { flex: none; }
+
+/* multi-clip switcher (F1 / KD alt cuts, Twosdays "leaked footage")
+   — deliberately small: a row of compact selector tabs beneath the
+   real, much larger hero video */
+.clip-switcher {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+}
+.clip-switcher__item {
+  position: relative;
+  width: 6.25rem;
+  aspect-ratio: 4 / 3;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(32, 30, 28, 0.16);
+  background: #000;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.clip-switcher__item img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: grayscale(1) contrast(1.05);
+  transition: filter var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.clip-switcher__item:hover img,
+.clip-switcher__item.is-current img {
+  filter: grayscale(0);
+  transform: scale(1.04);
+}
+.clip-switcher__item.is-current { border-color: var(--red); }
+.clip-switcher__rec {
+  position: absolute;
+  top: 0.35rem; left: 0.4rem;
+  display: flex; align-items: center; gap: 0.3em;
+  font-size: 0.55rem;
+  letter-spacing: 0.03em;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+.clip-switcher__rec::before {
+  content: "";
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--red);
+  animation: recBlink 1.4s ease-in-out infinite;
+}
+@keyframes recBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+.clip-switcher__play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  opacity: 0.9;
+}
+.clip-switcher__play svg { width: 1.15rem; height: 1.15rem; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.7)); }
+.clip-switcher__caption {
+  position: absolute;
+  left: 0.4rem; bottom: 0.3rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.01em;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+}
+
+/* source note under case studies */
+.source-note {
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+}
+
+/* =================================================================
+   CONTACT
+   ================================================================= */
+.slide--contact { justify-content: center; text-align: center; }
+.slide--contact .slide__inner { display: flex; flex-direction: column; align-items: center; }
+.closing-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 6vw, 4.25rem);
+  line-height: 1.15;
+  margin-bottom: 1.25rem;
+}
+.closing-sub {
+  font-size: 1rem;
+  color: var(--ink-soft);
+  max-width: 32rem;
+  margin-bottom: 2rem;
+}
+.contact-email {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  color: var(--red);
+  border-bottom: 1px solid rgba(200, 16, 46, 0.4);
+  padding-bottom: 0.2em;
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.contact-email:hover { color: var(--red-2); border-color: var(--red-2); }
+
+.social-row { display: flex; gap: 2rem; margin-top: 2.5rem; flex-wrap: wrap; justify-content: center; }
+.social-link {
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  position: relative;
+  padding-bottom: 4px;
+}
+.social-link::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 100%; height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform var(--dur-fast) var(--ease);
+}
+.social-link:hover { color: var(--red); }
+.social-link:hover::after { transform: scaleX(1); transform-origin: left; }
+
+.footer-note {
+  margin-top: 4rem;
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+}
+
+/* =================================================================
+   RESPONSIVE
+   ================================================================= */
+@media (max-width: 900px) {
+  .slide { padding-top: 4rem; }
+  .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .intro-photo-frame { max-width: 16rem; margin: 0 auto; }
+  .dot-nav { right: 1rem; gap: 0.65rem; }
+  .dot-nav__label { display: none; }
+  .brand-mark { font-size: 0.85rem; }
+  .intro-columns { grid-template-columns: 1fr; gap: 1.75rem; }
+
+  /* case studies: stack the written case above the media showcase
+     instead of squeezing two columns onto a narrow screen */
+  .case-layout { grid-template-columns: 1fr; gap: 2rem; }
+  .case-showcase--split { grid-template-columns: 1fr; }
+  .case-showcase--split .case-gallery { columns: 2 8rem; margin-top: 0.85rem; }
+  .instagram-frame { justify-content: center; }
+}
+
+@media (max-width: 520px) {
+  .slide__inner { padding-top: 1rem; padding-bottom: 1rem; }
+  .case-stats { grid-template-columns: repeat(2, 1fr); }
+  .clip-switcher__item { width: 5rem; }
+  .case-gallery { columns: 2 7rem; }
+}
